@@ -1,22 +1,63 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------
+ * Brand palette
+ *
+ * Two scales define the whole app theme:
+ *   - `navy`  — primary brand color (headers, buttons, dark surfaces)
+ *   - `blush` — accent color (highlights, badges, links)
+ *
+ * To restyle the app, change these values only. Tailwind v4 exposes
+ * each variable as utility classes automatically, e.g. `bg-navy-700`,
+ * `text-blush-400`, `border-navy-200`.
+ * --------------------------------------------------------------- */
+@theme {
+  --color-navy-50: #eef1f8;
+  --color-navy-100: #d6dee9;
+  --color-navy-200: #a8b6cd;
+  --color-navy-300: #7b8daa;
+  --color-navy-400: #4e6585;
+  --color-navy-500: #2f466a;
+  --color-navy-600: #1f3254;
+  --color-navy-700: #142340;
+  --color-navy-800: #0b1729;
+  --color-navy-900: #060d1a;
+
+  --color-blush-50: #fff4f7;
+  --color-blush-100: #ffe1e9;
+  --color-blush-200: #fcc1d1;
+  --color-blush-300: #f59bb1;
+  --color-blush-400: #ea7792;
+  --color-blush-500: #d85575;
+  --color-blush-600: #ba3a5a;
+  --color-blush-700: #932a46;
+}
+
+/* Fallback definitions so CSS vars are always available even if
+   Tailwind's theme resolution lags during dev hot-reload. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --background: #f5f4f1;
+  --foreground: #060d1a;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-navy-50: #eef1f8;
+  --color-navy-100: #d6dee9;
+  --color-navy-200: #a8b6cd;
+  --color-navy-300: #7b8daa;
+  --color-navy-400: #4e6585;
+  --color-navy-500: #2f466a;
+  --color-navy-600: #1f3254;
+  --color-navy-700: #142340;
+  --color-navy-800: #0b1729;
+  --color-navy-900: #060d1a;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-blush-50: #fff4f7;
+  --color-blush-100: #ffe1e9;
+  --color-blush-200: #fcc1d1;
+  --color-blush-300: #f59bb1;
+  --color-blush-400: #ea7792;
+  --color-blush-500: #d85575;
+  --color-blush-600: #ba3a5a;
+  --color-blush-700: #932a46;
 }
 
 body {

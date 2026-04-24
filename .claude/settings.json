@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rmdir src/controllers src/services)",
+      "Bash(mv src/middleware src/middlewares)",
+      "Bash(mkdir -p src/errors src/modules)",
+      "Bash(node -e \"const m = require\\('mongoose'\\); console.log\\(Object.keys\\(m\\).filter\\(k => k.toLowerCase\\(\\).includes\\('filter'\\)\\)\\);\")",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
