@@ -23,6 +23,16 @@ export function useMyConfirmation(weddingId: string | null) {
   });
 }
 
+export function useMyConfirmations() {
+  return useQuery({
+    queryKey: ["confirmations", "me"] as const,
+    queryFn: async () => {
+      const res = await api.get<Confirmation[]>("/confirmations/me");
+      return res.data;
+    },
+  });
+}
+
 export function useAllConfirmations() {
   return useQuery({
     queryKey: ["confirmations", "all"] as const,

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Calendar, Lock, MapPin, PawPrint, Star } from "lucide-react";
+import { Calendar, ChevronDown, Lock, MapPin, PawPrint, Star } from "lucide-react";
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { StatusBadge } from "./status-badge";
 import { useConfirmWedding, useMyConfirmation } from "@/hooks/use-confirmations";
 import { useOwner } from "@/hooks/use-users";
 import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import type { ChaperoneRef, ChaperoneRole, Wedding } from "@/types/api";
 
 function chaperoneId(ref: string | ChaperoneRef | undefined): string | null {
@@ -128,14 +129,14 @@ function BookedCard({
   const confirm = useConfirmWedding(wedding.id);
   const { data: owner } = useOwner();
   const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const [hasReachedBottom, setHasReachedBottom] = useState(false);
   const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // Watch the sentinel placed just above the confirm button. Once it enters
-  // the viewport even once, the user has scrolled the whole wedding details,
-  // so the Confirm button becomes active.
+  // Watch the sentinel placed just above the confirm button. Only relevant
+  // when the card is expanded and the user hasn't confirmed yet.
   useEffect(() => {
-    if (myConfirmation || hasReachedBottom) return;
+    if (!expanded || myConfirmation || hasReachedBottom) return;
     const node = bottomSentinelRef.current;
     if (!node) return;
 
@@ -153,7 +154,7 @@ function BookedCard({
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [myConfirmation, hasReachedBottom]);
+  }, [expanded, myConfirmation, hasReachedBottom]);
 
   const dogNames = wedding.dogs.map((d) => d.name).filter(Boolean);
   const ownerName = owner?.name?.trim() || "the owner";
@@ -175,30 +176,33 @@ function BookedCard({
 
   return (
     <Card className="border-blush-300">
-      <CardBody className="space-y-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+      <CardBody className="space-y-3">
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="flex w-full items-start justify-between gap-4 text-left"
+        >
+          <div className="flex-1">
             <h3 className="font-serif text-xl text-sage-900">
               {wedding.person1Name} & {wedding.person2Name}
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <RoleBadge role={myRole} />
+              {!isLoading && myConfirmation ? (
+                <Badge tone="confirmed">✓ Confirmed</Badge>
+              ) : !isLoading ? (
+                <Badge tone="new">⏳ Awaiting your commit</Badge>
+              ) : null}
             </div>
           </div>
 
-          <div className="text-right">
-            {isLoading ? (
-              <span className="text-xs text-stone-400">…</span>
-            ) : myConfirmation ? (
-              <div>
-                <Badge tone="confirmed">✓ Confirmed</Badge>
-                <p className="mt-1 text-xs text-stone-500">
-                  {format(new Date(myConfirmation.confirmedAt), "MMM d, yyyy 'at' h:mm a")}
-                </p>
-              </div>
-            ) : null}
-          </div>
-        </div>
+          <ChevronDown
+            className={cn(
+              "mt-1 h-5 w-5 shrink-0 text-sage-500 transition-transform",
+              expanded && "rotate-180"
+            )}
+          />
+        </button>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-stone-600">
           <span className="flex items-center gap-1">
@@ -217,14 +221,26 @@ function BookedCard({
           ) : null}
         </div>
 
-        {!isLoading && !myConfirmation ? (
-          <p className="rounded-lg border border-blush-200 bg-blush-50 px-3 py-2 text-center text-xs text-sage-700">
-            Please scroll through the full event details below before
-            committing.
-          </p>
-        ) : null}
+        {!expanded ? null : (
+          <div className="space-y-5 pt-2">
+            {!isLoading && !myConfirmation ? (
+              <p className="rounded-lg border border-blush-200 bg-blush-50 px-3 py-2 text-center text-xs text-sage-700">
+                Please scroll through the full event details below before
+                committing.
+              </p>
+            ) : null}
 
-        <CardSection title="Chaperone Roles">
+            {myConfirmation ? (
+              <p className="text-xs text-stone-500">
+                Confirmed{" "}
+                {format(
+                  new Date(myConfirmation.confirmedAt),
+                  "MMM d, yyyy 'at' h:mm a"
+                )}
+              </p>
+            ) : null}
+
+            <CardSection title="Chaperone Roles">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Badge tone="primary">★ Primary</Badge>
@@ -385,21 +401,30 @@ function BookedCard({
               Tapping commit locks you in — it cannot be undone.
             </p>
           </div>
-        ) : myConfirmation ? (
-          <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-            <div>
-              <p className="font-medium">
-                Your commitment to chaperoning for this event has been
-                confirmed.
-              </p>
-              <p className="mt-1">
-                Call {ownerName}
-                {owner?.phone ? ` (${owner.phone})` : ""} ASAP if you must
-                cancel.
-              </p>
-            </div>
+            ) : myConfirmation ? (
+              <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+                <div>
+                  <p className="font-medium">
+                    Your commitment to chaperoning for this event has been
+                    confirmed.
+                  </p>
+                  <p className="mt-1">
+                    Call {ownerName}
+                    {owner?.phone ? ` (${owner.phone})` : ""} ASAP if you must
+                    cancel.
+                  </p>
+                </div>
+              </div>
+            ) : null}
           </div>
+        )}
+
+        {!expanded && !isLoading && myConfirmation ? (
+          <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-xs text-emerald-800">
+            ✓ You committed on{" "}
+            {format(new Date(myConfirmation.confirmedAt), "MMM d, yyyy")}
+          </p>
         ) : null}
       </CardBody>
     </Card>
