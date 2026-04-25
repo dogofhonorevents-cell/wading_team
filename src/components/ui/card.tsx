@@ -38,7 +38,7 @@ export function CardSection({
 }) {
   return (
     <section className={cn("border-t border-stone-200 pt-4", className)}>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-navy-700">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-sage-700">
         {title}
       </p>
       {children}

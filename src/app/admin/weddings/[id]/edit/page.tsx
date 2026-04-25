@@ -29,7 +29,7 @@ export default function EditWeddingPage({
     <main className="mx-auto w-full max-w-4xl px-6 py-8">
       <Link
         href="/admin"
-        className="inline-flex items-center gap-1 text-sm font-medium text-navy-700 hover:underline"
+        className="inline-flex items-center gap-1 text-sm font-medium text-sage-700 hover:underline"
       >
         <ChevronLeft className="h-4 w-4" />
         Back to dashboard

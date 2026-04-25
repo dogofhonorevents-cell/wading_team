@@ -97,7 +97,7 @@ export default function AdminDashboard() {
     <main className="mx-auto w-full max-w-4xl px-6 py-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-4xl text-navy-900">
+          <h1 className="font-serif text-4xl text-sage-900">
             {user?.name ?? "Owner"}
           </h1>
           {user?.email ? (
@@ -166,7 +166,7 @@ export default function AdminDashboard() {
             <p className="text-stone-600">No weddings yet.</p>
             <Link
               href="/admin/weddings/new"
-              className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-navy-700 hover:underline"
+              className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-sage-700 hover:underline"
             >
               <Plus className="h-4 w-4" />
               Add your first wedding
@@ -209,8 +209,8 @@ function FilterTab({
       className={cn(
         "inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
         active
-          ? "border-navy-900 bg-navy-900 text-white"
-          : "border-stone-200 bg-white text-navy-700 hover:bg-stone-100"
+          ? "border-sage-900 bg-sage-900 text-white"
+          : "border-stone-200 bg-white text-sage-700 hover:bg-stone-100"
       )}
     >
       {label}

@@ -22,14 +22,14 @@ export default function UsersPage() {
     <main className="mx-auto w-full max-w-4xl px-6 py-8">
       <Link
         href="/admin"
-        className="inline-flex items-center gap-1 text-sm font-medium text-navy-700 hover:underline"
+        className="inline-flex items-center gap-1 text-sm font-medium text-sage-700 hover:underline"
       >
         <ChevronLeft className="h-4 w-4" />
         Back to dashboard
       </Link>
 
       <div className="mt-4 mb-6">
-        <h1 className="font-serif text-3xl text-navy-900">Manage Team</h1>
+        <h1 className="font-serif text-3xl text-sage-900">Manage Team</h1>
         <p className="mt-1 text-sm text-stone-600">
           New team members appear here automatically the first time they log in.
           Give them the login URL, and they sign up with their own email and password.
@@ -101,10 +101,10 @@ function UserRow({ user, isSelf }: { user: User; isSelf: boolean }) {
       <CardBody className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-serif text-lg text-navy-900">
+            <p className="font-serif text-lg text-sage-900">
               {user.name}
               {isSelf ? (
-                <span className="ml-2 text-xs font-medium text-navy-700">
+                <span className="ml-2 text-xs font-medium text-sage-700">
                   (you)
                 </span>
               ) : null}

@@ -8,6 +8,23 @@ import {
 import { api } from "@/lib/api";
 import type { User, UserRole } from "@/types/api";
 
+export interface OwnerInfo {
+  id: string;
+  name: string;
+  phone: string | null;
+}
+
+export function useOwner() {
+  return useQuery({
+    queryKey: ["users", "owner"] as const,
+    queryFn: async () => {
+      const res = await api.get<OwnerInfo | null>("/users/owner");
+      return res.data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useUsers(filter?: { role?: UserRole; isActive?: boolean }) {
   return useQuery({
     queryKey: ["users", filter ?? {}] as const,

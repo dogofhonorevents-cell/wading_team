@@ -100,7 +100,7 @@ export function WeddingCard({
       <CardBody className="space-y-3">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="font-serif text-xl text-navy-900">
+            <h3 className="font-serif text-xl text-sage-900">
               {wedding.person1Name} & {wedding.person2Name}
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -207,11 +207,11 @@ export function WeddingCard({
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <Badge tone="primary">★ Primary</Badge>
-                  <p className="mt-2 text-sm text-navy-900">{primaryName ?? "—"}</p>
+                  <p className="mt-2 text-sm text-sage-900">{primaryName ?? "—"}</p>
                 </div>
                 <div>
                   <Badge tone="secondary">Secondary</Badge>
-                  <p className="mt-2 text-sm text-navy-900">
+                  <p className="mt-2 text-sm text-sage-900">
                     {secondaryName ?? "— None —"}
                   </p>
                 </div>
@@ -242,7 +242,7 @@ export function WeddingCard({
               <CardSection title="Dogs">
                 <ul className="space-y-2">
                   {wedding.dogs.map((dog, i) => (
-                    <li key={i} className="text-sm text-navy-900">
+                    <li key={i} className="text-sm text-sage-900">
                       <span className="font-semibold uppercase tracking-wider text-stone-500 text-xs">
                         Dog {i + 1}
                       </span>
@@ -256,8 +256,8 @@ export function WeddingCard({
                 </ul>
 
                 <div className="mt-3 rounded-lg border border-blush-300 bg-blush-50 p-3 text-sm">
-                  <span className="font-semibold text-navy-900">⚠ Allergies: </span>
-                  <span className="text-navy-900">
+                  <span className="font-semibold text-sage-900">⚠ Allergies: </span>
+                  <span className="text-sage-900">
                     {wedding.allergies?.trim() || "None known"}
                   </span>
                 </div>
@@ -267,7 +267,7 @@ export function WeddingCard({
                     <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                       Behavior Notes
                     </p>
-                    <p className="mt-1 text-sm text-navy-900">
+                    <p className="mt-1 text-sm text-sage-900">
                       {wedding.behaviorNotes}
                     </p>
                   </div>
@@ -293,7 +293,7 @@ export function WeddingCard({
                     <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                       Timeline
                     </p>
-                    <p className="mt-1 text-sm text-navy-900">
+                    <p className="mt-1 text-sm text-sage-900">
                       {wedding.dayOfTimeline}
                     </p>
                   </div>
@@ -316,7 +316,7 @@ export function WeddingCard({
 
             {wedding.miscellaneousNotes ? (
               <CardSection title="Notes">
-                <p className="rounded-lg border border-stone-200 bg-stone-50 p-3 text-sm text-navy-900">
+                <p className="rounded-lg border border-stone-200 bg-stone-50 p-3 text-sm text-sage-900">
                   {wedding.miscellaneousNotes}
                 </p>
               </CardSection>
@@ -393,7 +393,7 @@ function AdminConfirmationStatus({ wedding }: { wedding: Wedding }) {
                   <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                     {row.label}
                   </span>
-                  <p className="text-navy-900">{row.name ?? "—"}</p>
+                  <p className="text-sage-900">{row.name ?? "—"}</p>
                 </div>
                 <div className="text-right">
                   {confirmation ? (
@@ -434,7 +434,7 @@ function Field({ label, value }: { label: string; value: string }) {
       <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">
         {label}
       </p>
-      <p className="mt-1 text-sm text-navy-900">{value}</p>
+      <p className="mt-1 text-sm text-sage-900">{value}</p>
     </div>
   );
 }
@@ -453,7 +453,7 @@ function ContactBlock({
       <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">
         {label}
       </p>
-      <p className="mt-1 text-sm text-navy-900">
+      <p className="mt-1 text-sm text-sage-900">
         {name}
         {phone ? ` · ${phone}` : ""}
       </p>

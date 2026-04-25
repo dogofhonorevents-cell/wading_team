@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { CircleCheck, CircleDashed } from "lucide-react";
 import { MyWeddingCard } from "@/components/wedding/my-wedding-card";
@@ -32,7 +32,7 @@ export default function TeamDashboard() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-6 space-y-6">
-      <div className="rounded-2xl bg-navy-800 p-6 text-white shadow-sm">
+      <div className="rounded-2xl bg-sage-800 p-6 text-white shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-widest text-blush-300">
           Logged in as
         </p>
@@ -40,7 +40,7 @@ export default function TeamDashboard() {
         {user?.email ? (
           <p className="mt-1 text-xs text-blush-200">{user.email}</p>
         ) : null}
-        <p className="mt-2 text-sm text-navy-100">
+        <p className="mt-2 text-sm text-sage-100">
           {booked.length} booked · {tentative.length} tentative
         </p>
       </div>

@@ -45,9 +45,9 @@ export function BellMenu() {
         className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-stone-200 bg-white hover:bg-stone-50"
         aria-label="Notifications"
       >
-        <Bell className="h-5 w-5 text-navy-700" />
+        <Bell className="h-5 w-5 text-sage-700" />
         {unreadCount > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-navy-600 px-1 text-[11px] font-semibold text-white">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-sage-600 px-1 text-[11px] font-semibold text-white">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         ) : null}
@@ -56,13 +56,13 @@ export function BellMenu() {
       {open ? (
         <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg">
           <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3">
-            <p className="font-serif text-lg text-navy-900">Confirmations</p>
+            <p className="font-serif text-lg text-sage-900">Confirmations</p>
             {unreadCount > 0 ? (
               <button
                 type="button"
                 onClick={() => markAllSeen.mutate()}
                 disabled={markAllSeen.isPending}
-                className="text-xs font-medium text-navy-700 hover:underline disabled:opacity-50"
+                className="text-xs font-medium text-sage-700 hover:underline disabled:opacity-50"
               >
                 Mark all as seen
               </button>
@@ -85,7 +85,7 @@ export function BellMenu() {
                     !n.seenByAdmin && "bg-blush-50"
                   )}
                 >
-                  <p className="text-sm text-navy-900">
+                  <p className="text-sm text-sage-900">
                     <span className="font-semibold">{extractUserName(n.user)}</span>
                     {" confirmed "}
                     <span className="font-medium">

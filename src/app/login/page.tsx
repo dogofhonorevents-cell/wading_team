@@ -59,7 +59,7 @@ export default function LoginPage() {
   if (!configured) {
     return (
       <main className="flex flex-1 items-center justify-center p-6">
-        <div className="max-w-lg rounded-xl border border-blush-300 bg-blush-50 p-6 text-sm text-navy-800">
+        <div className="max-w-lg rounded-xl border border-blush-300 bg-blush-50 p-6 text-sm text-sage-800">
           <h2 className="mb-2 text-lg font-semibold">Firebase not configured</h2>
           <p className="mb-2">
             Set the <code className="rounded bg-stone-200 px-1">NEXT_PUBLIC_FIREBASE_*</code>
@@ -78,10 +78,19 @@ export default function LoginPage() {
     <main className="flex flex-1 items-center justify-center p-6">
       <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
         <div className="mb-6 text-center">
-          <p className="text-xs uppercase tracking-widest text-navy-700">
-            Paws at the Altar
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Dog of Honor Weddings & Events"
+            className="mx-auto mb-3 h-16 w-auto"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+          <p className="text-xs uppercase tracking-widest text-sage-600">
+            Dog of Honor — Weddings &amp; Events
           </p>
-          <h1 className="mt-2 font-serif text-2xl text-navy-900">
+          <h1 className="mt-2 font-serif text-2xl text-sage-900">
             {mode === "login" ? "Welcome back" : "Create your account"}
           </h1>
         </div>
@@ -130,7 +139,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-stone-500 hover:text-navy-700"
+                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-stone-500 hover:text-sage-700"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -164,7 +173,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setMode("signup")}
-                className="font-medium text-navy-700 hover:underline"
+                className="font-medium text-sage-700 hover:underline"
               >
                 Sign up
               </button>
@@ -175,7 +184,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setMode("login")}
-                className="font-medium text-navy-700 hover:underline"
+                className="font-medium text-sage-700 hover:underline"
               >
                 Log in
               </button>

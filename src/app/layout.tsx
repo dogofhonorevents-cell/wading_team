@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Paws at the Altar",
+  title: "Dog of Honor — Weddings & Events",
   description: "Wedding dog chaperone team management",
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-stone-50 text-navy-900">
+      <body className="min-h-full flex flex-col bg-sage-50 text-sage-900">
         <QueryProvider>
           <AuthProvider>{children}</AuthProvider>
         </QueryProvider>

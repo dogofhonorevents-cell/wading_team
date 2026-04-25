@@ -324,7 +324,7 @@ function labelForUser(user: User, myId: string | undefined): string {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs font-semibold uppercase tracking-widest text-navy-700">
+    <p className="text-xs font-semibold uppercase tracking-widest text-sage-700">
       {children}
     </p>
   );

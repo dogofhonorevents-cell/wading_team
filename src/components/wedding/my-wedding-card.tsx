@@ -2,12 +2,13 @@
 
 import { Calendar, Lock, MapPin, PawPrint, Star } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardSection } from "@/components/ui/card";
 import { StatusBadge } from "./status-badge";
 import { useConfirmWedding, useMyConfirmation } from "@/hooks/use-confirmations";
+import { useOwner } from "@/hooks/use-users";
 import { ApiError } from "@/lib/api";
 import type { ChaperoneRef, ChaperoneRole, Wedding } from "@/types/api";
 
@@ -86,7 +87,7 @@ function TentativeCard({
       <CardBody className="space-y-3">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="font-serif text-xl text-navy-900">
+            <h3 className="font-serif text-xl text-sage-900">
               {wedding.person1Name} & {wedding.person2Name}
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -125,9 +126,37 @@ function BookedCard({
 }) {
   const { data: myConfirmation, isLoading } = useMyConfirmation(wedding.id);
   const confirm = useConfirmWedding(wedding.id);
+  const { data: owner } = useOwner();
   const [error, setError] = useState<string | null>(null);
+  const [hasReachedBottom, setHasReachedBottom] = useState(false);
+  const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Watch the sentinel placed just above the confirm button. Once it enters
+  // the viewport even once, the user has scrolled the whole wedding details,
+  // so the Confirm button becomes active.
+  useEffect(() => {
+    if (myConfirmation || hasReachedBottom) return;
+    const node = bottomSentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setHasReachedBottom(true);
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [myConfirmation, hasReachedBottom]);
 
   const dogNames = wedding.dogs.map((d) => d.name).filter(Boolean);
+  const ownerName = owner?.name?.trim() || "the owner";
 
   const handleConfirm = async () => {
     setError(null);
@@ -149,7 +178,7 @@ function BookedCard({
       <CardBody className="space-y-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="font-serif text-xl text-navy-900">
+            <h3 className="font-serif text-xl text-sage-900">
               {wedding.person1Name} & {wedding.person2Name}
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -189,45 +218,23 @@ function BookedCard({
         </div>
 
         {!isLoading && !myConfirmation ? (
-          <div className="space-y-2">
-            <Button
-              onClick={handleConfirm}
-              loading={confirm.isPending}
-              size="lg"
-              className="w-full"
-            >
-              Confirm I&rsquo;m In
-            </Button>
-            {error ? (
-              <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">
-                {error}
-              </p>
-            ) : null}
-            <p className="text-center text-xs text-stone-500">
-              Tapping confirm locks you in. Contact the owner to cancel.
-            </p>
-          </div>
-        ) : myConfirmation ? (
-          <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
-            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>
-              Your confirmation is locked in. Contact the owner if you need to
-              make changes.
-            </span>
-          </div>
+          <p className="rounded-lg border border-blush-200 bg-blush-50 px-3 py-2 text-center text-xs text-sage-700">
+            Please scroll through the full event details below before
+            committing.
+          </p>
         ) : null}
 
         <CardSection title="Chaperone Roles">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Badge tone="primary">★ Primary</Badge>
-              <p className="mt-2 text-sm text-navy-900">
+              <p className="mt-2 text-sm text-sage-900">
                 {chaperoneName(wedding.primaryChaperone) ?? "—"}
               </p>
             </div>
             <div>
               <Badge tone="secondary">Secondary</Badge>
-              <p className="mt-2 text-sm text-navy-900">
+              <p className="mt-2 text-sm text-sage-900">
                 {chaperoneName(wedding.secondaryChaperone) ?? "— None —"}
               </p>
             </div>
@@ -274,7 +281,7 @@ function BookedCard({
           <CardSection title="Dogs">
             <ul className="space-y-2">
               {wedding.dogs.map((dog, i) => (
-                <li key={i} className="text-sm text-navy-900">
+                <li key={i} className="text-sm text-sage-900">
                   <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                     Dog {i + 1}
                   </span>
@@ -288,8 +295,8 @@ function BookedCard({
             </ul>
 
             <div className="mt-3 rounded-lg border border-blush-300 bg-blush-50 p-3 text-sm">
-              <span className="font-semibold text-navy-900">⚠ Allergies: </span>
-              <span className="text-navy-900">
+              <span className="font-semibold text-sage-900">⚠ Allergies: </span>
+              <span className="text-sage-900">
                 {wedding.allergies?.trim() || "None known"}
               </span>
             </div>
@@ -299,7 +306,7 @@ function BookedCard({
                 <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                   Behavior Notes
                 </p>
-                <p className="mt-1 text-sm text-navy-900">
+                <p className="mt-1 text-sm text-sage-900">
                   {wedding.behaviorNotes}
                 </p>
               </div>
@@ -323,7 +330,7 @@ function BookedCard({
                 <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                   Timeline
                 </p>
-                <p className="mt-1 text-sm text-navy-900">
+                <p className="mt-1 text-sm text-sage-900">
                   {wedding.dayOfTimeline}
                 </p>
               </div>
@@ -346,10 +353,53 @@ function BookedCard({
 
         {wedding.miscellaneousNotes ? (
           <CardSection title="Notes">
-            <p className="rounded-lg border border-stone-200 bg-stone-50 p-3 text-sm text-navy-900">
+            <p className="rounded-lg border border-stone-200 bg-stone-50 p-3 text-sm text-sage-900">
               {wedding.miscellaneousNotes}
             </p>
           </CardSection>
+        ) : null}
+
+        {/* Sentinel — when this is in view we know the team member has
+            scrolled through every detail above. */}
+        <div ref={bottomSentinelRef} aria-hidden="true" />
+
+        {!isLoading && !myConfirmation ? (
+          <div className="space-y-2 border-t border-stone-200 pt-4">
+            <Button
+              onClick={handleConfirm}
+              loading={confirm.isPending}
+              disabled={!hasReachedBottom || confirm.isPending}
+              size="lg"
+              className="w-full"
+            >
+              {hasReachedBottom
+                ? "I commit to chaperoning this event"
+                : "Scroll up to read all details first"}
+            </Button>
+            {error ? (
+              <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">
+                {error}
+              </p>
+            ) : null}
+            <p className="text-center text-xs text-stone-500">
+              Tapping commit locks you in — it cannot be undone.
+            </p>
+          </div>
+        ) : myConfirmation ? (
+          <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-medium">
+                Your commitment to chaperoning for this event has been
+                confirmed.
+              </p>
+              <p className="mt-1">
+                Call {ownerName}
+                {owner?.phone ? ` (${owner.phone})` : ""} ASAP if you must
+                cancel.
+              </p>
+            </div>
+          </div>
         ) : null}
       </CardBody>
     </Card>
@@ -370,7 +420,7 @@ function ContactBlock({
       <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">
         {label}
       </p>
-      <p className="mt-1 text-sm text-navy-900">
+      <p className="mt-1 text-sm text-sage-900">
         {name}
         {phone ? ` · ${phone}` : ""}
       </p>
@@ -384,7 +434,7 @@ function Field({ label, value }: { label: string; value: string }) {
       <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">
         {label}
       </p>
-      <p className="mt-1 text-sm text-navy-900">{value}</p>
+      <p className="mt-1 text-sm text-sage-900">{value}</p>
     </div>
   );
 }
