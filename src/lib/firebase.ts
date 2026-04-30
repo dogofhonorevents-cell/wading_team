@@ -12,12 +12,12 @@ import { getAuth, type Auth } from "firebase/auth";
 // };
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA24yw-N-Iy02VxaQEtcvqFmAuHksU8AkE",
-  authDomain: "wading-team.firebaseapp.com",
-  projectId: "wading-team",
-  storageBucket: "wading-team.firebasestorage.app",
-  messagingSenderId: "711151313894",
-  appId: "1:711151313894:web:56d69d810918e4d5576c27"
+  apiKey: "AIzaSyBBVn-xnjxfZZyJugEwlHbKrn2_rjwjznU",
+  authDomain: "wadding-team-d22c3.firebaseapp.com",
+  projectId: "wadding-team-d22c3",
+  storageBucket: "wadding-team-d22c3.firebasestorage.app",
+  messagingSenderId: "3157995559",
+  appId: "1:3157995559:web:2cb2b1df49c617864ede02"
 };
 
 let firebaseApp: FirebaseApp | null = null;
