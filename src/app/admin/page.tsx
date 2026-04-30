@@ -1,4 +1,5 @@
-﻿"use client";
+﻿/* eslint-disable react-hooks/exhaustive-deps */
+"use client";
 
 import Link from "next/link";
 import { Plus, Users } from "lucide-react";
@@ -177,7 +178,7 @@ export default function AdminDashboard() {
             No weddings match this filter.
           </div>
         ) : (
-          filtered.map((w) => (
+          [...filtered].reverse().map((w) => (
             <WeddingCard
               key={w.id}
               wedding={w}
