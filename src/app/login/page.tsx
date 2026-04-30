@@ -1,20 +1,21 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, Mail, ShieldAlert } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/providers/auth-provider";
 
-type Mode = "login" | "signup";
+type Mode = "login" | "signup" | "forgot";
 
 export default function LoginPage() {
   const router = useRouter();
   const {
     login,
     signup,
+    sendPasswordReset,
     user,
     loading,
     configured,
@@ -28,6 +29,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetSentTo, setResetSentTo] = useState<string | null>(null);
 
   const displayedError = error ?? authError;
 
@@ -37,6 +39,13 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
 
+  const switchMode = (next: Mode) => {
+    setMode(next);
+    setError(null);
+    setResetSentTo(null);
+    clearAuthError();
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -45,8 +54,11 @@ export default function LoginPage() {
     try {
       if (mode === "login") {
         await login(email, password);
-      } else {
+      } else if (mode === "signup") {
         await signup(email, password, name.trim() || undefined);
+      } else {
+        await sendPasswordReset(email.trim());
+        setResetSentTo(email.trim());
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Authentication failed";
@@ -91,107 +103,225 @@ export default function LoginPage() {
             Dog of Honor — Weddings &amp; Events
           </p>
           <h1 className="mt-2 font-serif text-2xl text-sage-900">
-            {mode === "login" ? "Welcome back" : "Create your account"}
+            {mode === "login"
+              ? "Welcome back"
+              : mode === "signup"
+              ? "Create your account"
+              : "Reset your password"}
           </h1>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === "signup" ? (
-            <div className="space-y-1">
-              <Label htmlFor="name">Full name</Label>
-              <Input
-                id="name"
-                type="text"
-                autoComplete="name"
-                required
-                placeholder="Alex Harper"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-          ) : null}
-
-          <div className="space-y-1">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-stone-500 hover:text-sage-700"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {displayedError ? (
-            <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-              {displayedError}
+          {mode === "forgot" ? (
+            <p className="mt-2 text-sm text-stone-600">
+              Enter your email and we&apos;ll send you a secure link to set a new password.
             </p>
           ) : null}
-
-          <Button
-            type="submit"
-            loading={submitting}
-            size="lg"
-            className="w-full"
-          >
-            {mode === "login" ? "Log In" : "Sign Up"}
-          </Button>
-        </form>
-
-        <div className="mt-4 text-center text-sm text-stone-600">
-          {mode === "login" ? (
-            <>
-              No account?{" "}
-              <button
-                type="button"
-                onClick={() => setMode("signup")}
-                className="font-medium text-sage-700 hover:underline"
-              >
-                Sign up
-              </button>
-            </>
-          ) : (
-            <>
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => setMode("login")}
-                className="font-medium text-sage-700 hover:underline"
-              >
-                Log in
-              </button>
-            </>
-          )}
         </div>
+
+        {mode === "forgot" && resetSentTo ? (
+          <ResetSentNotice
+            email={resetSentTo}
+            onBackToLogin={() => switchMode("login")}
+          />
+        ) : (
+          <>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {mode === "signup" ? (
+                <div className="space-y-1">
+                  <Label htmlFor="name">Full name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    placeholder="Alex Harper"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+              ) : null}
+
+              <div className="space-y-1">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              {mode !== "forgot" ? (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    {mode === "login" ? (
+                      <button
+                        type="button"
+                        onClick={() => switchMode("forgot")}
+                        className="text-xs font-medium text-sage-700 hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    ) : null}
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete={
+                        mode === "login" ? "current-password" : "new-password"
+                      }
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-stone-500 hover:text-sage-700"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              {displayedError ? (
+                <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {displayedError}
+                </p>
+              ) : null}
+
+              <Button
+                type="submit"
+                loading={submitting}
+                size="lg"
+                className="w-full"
+              >
+                {mode === "login"
+                  ? "Log In"
+                  : mode === "signup"
+                  ? "Sign Up"
+                  : "Send reset link"}
+              </Button>
+            </form>
+
+            <div className="mt-4 text-center text-sm text-stone-600">
+              {mode === "login" ? (
+                <>
+                  No account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signup")}
+                    className="font-medium text-sage-700 hover:underline"
+                  >
+                    Sign up
+                  </button>
+                </>
+              ) : mode === "signup" ? (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("login")}
+                    className="font-medium text-sage-700 hover:underline"
+                  >
+                    Log in
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => switchMode("login")}
+                  className="inline-flex items-center gap-1 font-medium text-sage-700 hover:underline"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Back to log in
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </main>
+  );
+}
+
+function ResetSentNotice({
+  email,
+  onBackToLogin,
+}: {
+  email: string;
+  onBackToLogin: () => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-sage-200 bg-sage-50 p-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sage-700 text-white">
+            <Mail className="h-4 w-4" />
+          </span>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-sage-900">
+              Check your inbox
+            </p>
+            <p className="mt-1 text-sm text-sage-800">
+              We&apos;ve emailed a password reset link to{" "}
+              <strong className="break-all">{email}</strong>. Open the email and
+              follow the link to set a new password.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-blush-300 bg-blush-50 p-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blush-300 text-sage-900">
+            <ShieldAlert className="h-4 w-4" />
+          </span>
+          <div className="flex-1 text-sm text-sage-900">
+            <p className="font-semibold">Can&apos;t find the email?</p>
+            <ul className="mt-2 list-disc space-y-1 pl-4 text-sage-800">
+              <li>
+                It can take a minute or two to arrive — please be patient.
+              </li>
+              <li>
+                <strong>Check your Spam or Junk folder.</strong> Reset links
+                from Firebase sometimes land there. If you find it in spam,
+                mark it as &ldquo;Not Spam&rdquo; so future emails reach your
+                inbox.
+              </li>
+              <li>Search for &ldquo;noreply&rdquo; or &ldquo;Firebase&rdquo;.</li>
+              <li>
+                Make sure the email above is the one you used when you signed
+                up.
+              </li>
+              <li>
+                The reset link expires in about an hour — request a new one if
+                you wait too long.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="lg"
+        className="w-full"
+        onClick={onBackToLogin}
+      >
+        Back to log in
+      </Button>
+    </div>
   );
 }

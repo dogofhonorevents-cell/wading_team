@@ -26,6 +26,7 @@ function refId(ref: string | ChaperoneRef | undefined): string | null {
 }
 
 function confirmationWeddingId(c: Confirmation): string | null {
+  if (!c.wedding) return null;
   if (typeof c.wedding === "string") return c.wedding;
   return c.wedding.id ?? null;
 }

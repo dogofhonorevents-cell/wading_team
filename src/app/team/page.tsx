@@ -31,6 +31,7 @@ function confirmedWeddingIdsFor(
   const out = new Set<string>();
   if (!confirmations) return out;
   for (const c of confirmations) {
+    if (!c.wedding) continue;
     const wid = typeof c.wedding === "string" ? c.wedding : c.wedding.id;
     if (wid) out.add(wid);
   }

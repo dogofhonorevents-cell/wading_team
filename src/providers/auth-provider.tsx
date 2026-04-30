@@ -4,6 +4,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   updateProfile,
   type User as FirebaseUser,
@@ -32,6 +33,7 @@ interface AuthContextValue {
   signup: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -135,6 +137,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth);
   }, []);
 
+  const sendPasswordReset = useCallback(async (email: string) => {
+    const auth = getFirebaseAuth();
+    setAuthError(null);
+    await sendPasswordResetEmail(auth, email);
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       firebaseUser,
@@ -147,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signup,
       logout,
       refreshUser,
+      sendPasswordReset,
     }),
     [
       firebaseUser,
@@ -159,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signup,
       logout,
       refreshUser,
+      sendPasswordReset,
     ]
   );
 
