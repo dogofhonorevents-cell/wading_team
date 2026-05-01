@@ -1,7 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Eye, EyeOff, Mail, ShieldAlert } from "lucide-react";
+import {
+  ChevronLeft,
+  Clock,
+  Eye,
+  EyeOff,
+  Mail,
+  ShieldAlert,
+} from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,8 +37,14 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resetSentTo, setResetSentTo] = useState<string | null>(null);
+  const [pendingSignupEmail, setPendingSignupEmail] = useState<string | null>(
+    null
+  );
 
   const displayedError = error ?? authError;
+  const isPendingApprovalError =
+    displayedError !== null &&
+    /awaiting approval|pending approval/i.test(displayedError);
 
   useEffect(() => {
     if (user && !loading) {
@@ -43,6 +56,7 @@ export default function LoginPage() {
     setMode(next);
     setError(null);
     setResetSentTo(null);
+    setPendingSignupEmail(null);
     clearAuthError();
   };
 
@@ -56,6 +70,7 @@ export default function LoginPage() {
         await login(email, password);
       } else if (mode === "signup") {
         await signup(email, password, name.trim() || undefined);
+        setPendingSignupEmail(email.trim());
       } else {
         await sendPasswordReset(email.trim());
         setResetSentTo(email.trim());
@@ -119,6 +134,12 @@ export default function LoginPage() {
         {mode === "forgot" && resetSentTo ? (
           <ResetSentNotice
             email={resetSentTo}
+            onBackToLogin={() => switchMode("login")}
+          />
+        ) : isPendingApprovalError ? (
+          <PendingApprovalNotice
+            email={pendingSignupEmail ?? email.trim()}
+            justSignedUp={mode === "signup"}
             onBackToLogin={() => switchMode("login")}
           />
         ) : (
@@ -252,6 +273,53 @@ export default function LoginPage() {
         )}
       </div>
     </main>
+  );
+}
+
+function PendingApprovalNotice({
+  email,
+  justSignedUp,
+  onBackToLogin,
+}: {
+  email: string;
+  justSignedUp: boolean;
+  onBackToLogin: () => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-blush-300 bg-blush-50 p-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blush-300 text-sage-900">
+            <Clock className="h-4 w-4" />
+          </span>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-sage-900">
+              {justSignedUp
+                ? "Account created — pending approval"
+                : "Your account is pending approval"}
+            </p>
+            {email ? (
+              <p className="mt-1 text-sm text-sage-800 break-all">{email}</p>
+            ) : null}
+            <p className="mt-2 text-sm text-sage-800">
+              {justSignedUp
+                ? "Thanks for signing up! The site owner needs to approve your account before you can log in. You'll be able to access the app once they approve you."
+                : "The site owner needs to approve your account before you can log in. Please reach out to them if it's been a while."}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="lg"
+        className="w-full"
+        onClick={onBackToLogin}
+      >
+        Back to log in
+      </Button>
+    </div>
   );
 }
 

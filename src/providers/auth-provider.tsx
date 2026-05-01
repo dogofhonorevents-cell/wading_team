@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       if (err instanceof ApiError && err.status === 403) {
         setAuthError(
-          err.message || "Your account is deactivated. Contact the owner."
+          err.message || "Your account is awaiting approval from the site owner."
         );
         try {
           await signOut(getFirebaseAuth());
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // ignore
         }
         const message =
-          err.message || "Your account is deactivated. Contact the owner.";
+          err.message || "Your account is awaiting approval from the site owner.";
         setAuthError(message);
         throw new ApiError(403, message);
       }

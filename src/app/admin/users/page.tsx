@@ -1,9 +1,9 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { ChevronLeft, Power, PowerOff, Star } from "lucide-react";
+import { Check, ChevronLeft, Power, PowerOff, Star } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
 import { Card, CardBody } from "@/components/ui/card";
@@ -18,6 +18,16 @@ export default function UsersPage() {
 
   const users = data ?? [];
 
+  const { pending, approved } = useMemo(() => {
+    const pending: User[] = [];
+    const approved: User[] = [];
+    for (const u of users) {
+      if (u.isActive) approved.push(u);
+      else pending.push(u);
+    }
+    return { pending, approved };
+  }, [users]);
+
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-8">
       <Link
@@ -31,8 +41,9 @@ export default function UsersPage() {
       <div className="mt-4 mb-6">
         <h1 className="font-serif text-3xl text-sage-900">Manage Team</h1>
         <p className="mt-1 text-sm text-stone-600">
-          New team members appear here automatically the first time they log in.
-          Give them the login URL, and they sign up with their own email and password.
+          New team members must sign up themselves on the login page. Their
+          accounts then appear here for you to approve before they can access
+          the app or be assigned to weddings.
         </p>
       </div>
 
@@ -50,19 +61,50 @@ export default function UsersPage() {
         <Card>
           <CardBody>
             <p className="text-sm text-stone-600">
-              No team members yet. Share the login URL with the people you want to invite.
+              No team members yet. Share the login URL with the people you want
+              to invite. Once they sign up, they&apos;ll show up here for
+              approval.
             </p>
           </CardBody>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {users.map((u) => (
-            <UserRow
-              key={u.id}
-              user={u}
-              isSelf={currentUser?.id === u.id}
-            />
-          ))}
+        <div className="space-y-8">
+          {pending.length > 0 ? (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <h2 className="font-serif text-xl text-sage-900">
+                  Awaiting Approval
+                </h2>
+                <span className="inline-flex items-center justify-center rounded-full bg-blush-300 px-2.5 py-0.5 text-xs font-semibold text-sage-900">
+                  {pending.length}
+                </span>
+              </div>
+              <p className="text-sm text-stone-600">
+                These people signed up but can&apos;t use the app or be assigned
+                to weddings until you approve them.
+              </p>
+              {pending.map((u) => (
+                <UserRow
+                  key={u.id}
+                  user={u}
+                  isSelf={currentUser?.id === u.id}
+                />
+              ))}
+            </section>
+          ) : null}
+
+          {approved.length > 0 ? (
+            <section className="space-y-3">
+              <h2 className="font-serif text-xl text-sage-900">Team Members</h2>
+              {approved.map((u) => (
+                <UserRow
+                  key={u.id}
+                  user={u}
+                  isSelf={currentUser?.id === u.id}
+                />
+              ))}
+            </section>
+          ) : null}
         </div>
       )}
     </main>
@@ -73,9 +115,13 @@ function UserRow({ user, isSelf }: { user: User; isSelf: boolean }) {
   const updateUser = useUpdateUser(user.id);
   const [error, setError] = useState<string | null>(null);
 
+  const hasLoggedIn = Boolean(user.lastLoginAt);
+  const isPending = !user.isActive && !hasLoggedIn;
+  const isDeactivated = !user.isActive && hasLoggedIn;
+
   const lastLogin = user.lastLoginAt
     ? format(new Date(user.lastLoginAt), "MMM d, yyyy 'at' h:mm a")
-    : "Never";
+    : "Never logged in";
 
   const handleRoleChange = async (role: UserRole) => {
     if (role === user.role) return;
@@ -97,7 +143,15 @@ function UserRow({ user, isSelf }: { user: User; isSelf: boolean }) {
   };
 
   return (
-    <Card className={user.isActive ? "" : "opacity-70"}>
+    <Card
+      className={
+        isPending
+          ? "border-blush-300 bg-blush-50/40"
+          : user.isActive
+          ? ""
+          : "opacity-70"
+      }
+    >
       <CardBody className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -117,10 +171,12 @@ function UserRow({ user, isSelf }: { user: User; isSelf: boolean }) {
             ) : (
               <Badge tone="secondary">Team Member</Badge>
             )}
-            {user.isActive ? (
-              <Badge tone="confirmed">Active</Badge>
+            {isPending ? (
+              <Badge tone="new">⏳ Pending Approval</Badge>
+            ) : isDeactivated ? (
+              <Badge tone="neutral">Deactivated</Badge>
             ) : (
-              <Badge tone="neutral">Inactive</Badge>
+              <Badge tone="confirmed">Active</Badge>
             )}
           </div>
 
@@ -160,12 +216,18 @@ function UserRow({ user, isSelf }: { user: User; isSelf: boolean }) {
             disabled={updateUser.isPending || isSelf}
             onClick={handleToggleActive}
             className={`mt-2 inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              user.isActive
+              isPending
+                ? "border-emerald-300 bg-emerald-600 text-white hover:bg-emerald-700"
+                : user.isActive
                 ? "border-red-200 bg-white text-red-700 hover:bg-red-50"
                 : "border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
             }`}
           >
-            {user.isActive ? (
+            {isPending ? (
+              <>
+                <Check className="h-4 w-4" /> Approve
+              </>
+            ) : user.isActive ? (
               <>
                 <PowerOff className="h-4 w-4" /> Deactivate
               </>
