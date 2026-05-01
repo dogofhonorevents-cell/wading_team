@@ -31,6 +31,12 @@ function confirmationWeddingId(c: Confirmation): string | null {
   return c.wedding.id ?? null;
 }
 
+function confirmationUserId(c: Confirmation): string | null {
+  if (!c.user) return null;
+  if (typeof c.user === "string") return c.user;
+  return c.user.id ?? null;
+}
+
 function computeSummary(
   wedding: Wedding,
   confirmations: Confirmation[] | undefined
@@ -38,9 +44,16 @@ function computeSummary(
   const primary = refId(wedding.primaryChaperone);
   const secondary = refId(wedding.secondaryChaperone);
   const assigned = (primary ? 1 : 0) + (secondary ? 1 : 0);
-  const forThisWedding =
-    confirmations?.filter((c) => confirmationWeddingId(c) === wedding.id) ?? [];
-  return { assigned, confirmed: forThisWedding.length };
+
+  const assignedIds = new Set([primary, secondary].filter(Boolean) as string[]);
+
+  const validForThisWedding = (confirmations ?? []).filter((c) => {
+    if (confirmationWeddingId(c) !== wedding.id) return false;
+    const uid = confirmationUserId(c);
+    return uid !== null && assignedIds.has(uid);
+  });
+
+  return { assigned, confirmed: validForThisWedding.length };
 }
 
 export default function AdminDashboard() {
