@@ -21,7 +21,7 @@ import {
   useToggleWeddingStatus,
 } from "@/hooks/use-weddings";
 import { ApiError } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, weddingDateForDisplay } from "@/lib/utils";
 import type { ChaperoneRef, Confirmation, Wedding } from "@/types/api";
 
 function chaperoneId(ref: string | ChaperoneRef | undefined): string | null {
@@ -37,9 +37,10 @@ function chaperoneName(ref: string | ChaperoneRef | undefined): string | null {
 }
 
 function formatDate(iso?: string, pattern = "EEE, MMM d, yyyy"): string {
-  if (!iso) return "—";
+  const d = weddingDateForDisplay(iso);
+  if (!d) return "—";
   try {
-    return format(new Date(iso), pattern);
+    return format(d, pattern);
   } catch {
     return "—";
   }

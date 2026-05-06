@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { weddingDateInputToISO, weddingDateInputValue } from "./utils";
 import type { ChaperoneRef, Wedding } from "@/types/api";
 
 const objectIdRegex = /^[a-f\d]{24}$/i;
@@ -101,6 +102,10 @@ export function sanitizeForApi(values: WeddingFormValues): Record<string, unknow
     payload[key] = value;
   }
 
+  if (typeof payload.weddingDate === "string" && payload.weddingDate) {
+    payload.weddingDate = weddingDateInputToISO(payload.weddingDate);
+  }
+
   const cleanDogs = values.dogs
     .filter((d) => d.name.trim().length > 0)
     .map((d) => ({
@@ -122,6 +127,10 @@ export function sanitizeForUpdate(values: WeddingFormValues): Record<string, unk
     payload[key] = value;
   }
 
+  if (typeof payload.weddingDate === "string" && payload.weddingDate) {
+    payload.weddingDate = weddingDateInputToISO(payload.weddingDate);
+  }
+
   payload.dogs = values.dogs
     .filter((d) => d.name.trim().length > 0)
     .map((d) => ({
@@ -139,23 +148,13 @@ function chaperoneIdOf(ref: string | ChaperoneRef | undefined): string {
   return ref.id ?? ref._id ?? "";
 }
 
-function dateToInput(iso: string | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
-
 export function weddingToFormValues(wedding: Wedding): WeddingFormValues {
   return {
     person1Name: wedding.person1Name ?? "",
     person1Phone: wedding.person1Phone ?? "",
     person2Name: wedding.person2Name ?? "",
     person2Phone: wedding.person2Phone ?? "",
-    weddingDate: dateToInput(wedding.weddingDate),
+    weddingDate: weddingDateInputValue(wedding.weddingDate),
     venue: wedding.venue ?? "",
     status: wedding.status ?? "tentative",
     primaryChaperone: chaperoneIdOf(wedding.primaryChaperone),

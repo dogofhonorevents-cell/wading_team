@@ -10,7 +10,7 @@ import { StatusBadge } from "./status-badge";
 import { useConfirmWedding, useMyConfirmation } from "@/hooks/use-confirmations";
 import { useOwner } from "@/hooks/use-users";
 import { ApiError } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, weddingDateForDisplay } from "@/lib/utils";
 import type { ChaperoneRef, ChaperoneRole, Wedding } from "@/types/api";
 
 function chaperoneId(ref: string | ChaperoneRef | undefined): string | null {
@@ -35,9 +35,10 @@ function findMyRole(
 }
 
 function formatDate(iso?: string, pattern = "EEE, MMM d, yyyy"): string {
-  if (!iso) return "—";
+  const d = weddingDateForDisplay(iso);
+  if (!d) return "—";
   try {
-    return format(new Date(iso), pattern);
+    return format(d, pattern);
   } catch {
     return "—";
   }
