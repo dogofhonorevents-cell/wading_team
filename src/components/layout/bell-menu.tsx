@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils";
 import type { Confirmation } from "@/types/api";
 
 function extractUserName(user: Confirmation["user"]): string {
-  if (typeof user === "string") return "Someone";
+  if (!user || typeof user === "string") return "Someone";
   return user.name || user.email;
 }
 
 function extractWeddingTitle(wedding: Confirmation["wedding"]): string {
-  if (typeof wedding === "string") return "A wedding";
+  if (!wedding || typeof wedding === "string") return "A wedding";
   return `${wedding.person1Name} & ${wedding.person2Name}`;
 }
 

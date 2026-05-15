@@ -5,14 +5,18 @@ import Link from "next/link";
 import { Plus, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { WeddingCard } from "@/components/wedding/wedding-card";
 import { useWeddings } from "@/hooks/use-weddings";
 import { useAllConfirmations } from "@/hooks/use-confirmations";
+import { useUsers } from "@/hooks/use-users";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import type { ChaperoneRef, Confirmation, Wedding } from "@/types/api";
 
 type Filter = "all" | "confirmed" | "waiting" | "tentative";
+
+const PAGE_SIZE = 20;
 
 interface Summary {
   assigned: number;
@@ -59,8 +63,12 @@ function computeSummary(
 export default function AdminDashboard() {
   const { data, isLoading, error } = useWeddings();
   const { data: confirmations } = useAllConfirmations();
+  const { data: teamMembers } = useUsers({ role: "team_member", isActive: true });
   const { user } = useAuth();
   const [filter, setFilter] = useState<Filter>("all");
+  const [teamMemberId, setTeamMemberId] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const [prevFilterKey, setPrevFilterKey] = useState("all|all");
 
   const weddings = data ?? [];
   const total = weddings.length;
@@ -74,11 +82,20 @@ export default function AdminDashboard() {
     return map;
   }, [weddings, confirmations]);
 
+  const byTeamMember = useMemo(() => {
+    if (teamMemberId === "all") return weddings;
+    return weddings.filter((w) => {
+      const primary = refId(w.primaryChaperone);
+      const secondary = refId(w.secondaryChaperone);
+      return primary === teamMemberId || secondary === teamMemberId;
+    });
+  }, [weddings, teamMemberId]);
+
   const counts = useMemo(() => {
     let confirmed = 0;
     let waiting = 0;
     let tentative = 0;
-    for (const w of weddings) {
+    for (const w of byTeamMember) {
       if (w.status === "tentative") {
         tentative++;
         continue;
@@ -90,23 +107,37 @@ export default function AdminDashboard() {
         waiting++;
       }
     }
-    return { all: weddings.length, confirmed, waiting, tentative };
-  }, [weddings, summaries]);
+    return { all: byTeamMember.length, confirmed, waiting, tentative };
+  }, [byTeamMember, summaries]);
 
   const filtered = useMemo(() => {
-    if (filter === "all") return weddings;
+    if (filter === "all") return byTeamMember;
     if (filter === "tentative") {
-      return weddings.filter((w) => w.status === "tentative");
+      return byTeamMember.filter((w) => w.status === "tentative");
     }
     const wantConfirmed = filter === "confirmed";
-    return weddings.filter((w) => {
+    return byTeamMember.filter((w) => {
       if (w.status !== "booked") return false;
       const s = summaries.get(w.id);
       if (!s) return false;
       const allConfirmed = s.assigned > 0 && s.confirmed >= s.assigned;
       return wantConfirmed ? allConfirmed : !allConfirmed;
     });
-  }, [weddings, summaries, filter]);
+  }, [byTeamMember, summaries, filter]);
+
+  const filterKey = `${filter}|${teamMemberId}`;
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const paged = useMemo(
+    () =>
+      filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filtered, currentPage]
+  );
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-8">
@@ -138,7 +169,25 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-6">
+        <label className="mb-2 block text-xs font-medium text-stone-600">
+          Team member
+        </label>
+        <Select
+          value={teamMemberId}
+          onChange={(e) => setTeamMemberId(e.target.value)}
+          className="max-w-xs"
+        >
+          <option value="all">All team members</option>
+          {(teamMembers ?? []).map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name || m.email}
+            </option>
+          ))}
+        </Select>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
         <FilterTab
           label="All"
           count={counts.all}
@@ -192,14 +241,47 @@ export default function AdminDashboard() {
             No weddings match this filter.
           </div>
         ) : (
-          [...filtered].reverse().map((w) => (
-            <WeddingCard
-              key={w.id}
-              wedding={w}
-              isAdmin
-              confirmationSummary={summaries.get(w.id)}
-            />
-          ))
+          <>
+            {paged.map((w) => (
+              <WeddingCard
+                key={w.id}
+                wedding={w}
+                isAdmin
+                confirmationSummary={summaries.get(w.id)}
+              />
+            ))}
+
+            {pageCount > 1 ? (
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-sm text-stone-500">
+                  Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+                  {Math.min(currentPage * PAGE_SIZE, filtered.length)} of{" "}
+                  {filtered.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-stone-600">
+                    Page {currentPage} of {pageCount}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage >= pageCount}
+                    onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </>
         )}
       </section>
     </main>

@@ -38,10 +38,10 @@ function confirmedWeddingIdsFor(
   return out;
 }
 
-function newestFirst(a: Wedding, b: Wedding): number {
-  const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-  const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-  return bTime - aTime;
+function earliestFirst(a: Wedding, b: Wedding): number {
+  const aTime = a.weddingDate ? new Date(a.weddingDate).getTime() : Infinity;
+  const bTime = b.weddingDate ? new Date(b.weddingDate).getTime() : Infinity;
+  return aTime - bTime;
 }
 
 export default function TeamDashboard() {
@@ -53,7 +53,7 @@ export default function TeamDashboard() {
   const weddings = useMemo(() => {
     const all = data ?? [];
     const mine = user?.id ? all.filter((w) => isAssignedTo(w, user.id)) : [];
-    return [...mine].sort(newestFirst);
+    return [...mine].sort(earliestFirst);
   }, [data, user?.id]);
 
   const confirmedIds = useMemo(
